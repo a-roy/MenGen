@@ -54,7 +54,7 @@ if __name__ == '__main__':
                     items += gen_items
                     for line in gen_items.split('\n'):
                         item_dict[line + '\n'] = item
-        items = items.replace('"', '\\"').strip()
+        items = items.replace('"', '\\"').strip('\n')
         menu = args.menu
         if 'idx' in menudata:
             idx = int(subprocess.check_output(
