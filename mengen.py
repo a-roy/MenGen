@@ -27,10 +27,10 @@ if __name__ == '__main__':
     item_dict = {}
     if 'items' in menudata:
         for item in menudata['items']:
-            items += subprocess.check_output(
+            key = subprocess.check_output(
                     'echo %s' % item['txt'], shell=True).decode('utf-8')
-            item_dict[subprocess.check_output('echo %s' % item['txt'],
-                shell=True).decode('utf-8')] = item['cmd']
+            items += key
+            item_dict[key] = item['cmd']
     if 'gen' in menudata:
         gen = menudata['gen']
         items += subprocess.check_output(
