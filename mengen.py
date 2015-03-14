@@ -5,8 +5,6 @@ import subprocess
 import shlex
 import yaml
 
-default_menu = 'dmenu -i -l 20'
-
 def evaluate(env, item):
     if 'cmd' in item:
         subprocess.call(env + item['cmd'], shell=True)
@@ -22,6 +20,7 @@ def evaluate(env, item):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('infile')
+    parser.add_argument('-m', '--menu', default='dmenu -i -l 20')
     parser.add_argument('start', nargs='?', default='main')
     parser.add_argument('arg', nargs='*', default=[])
     args = parser.parse_args()
@@ -58,8 +57,7 @@ if __name__ == '__main__':
         items = items.replace('"', '\\"').strip()
         try:
             selection = subprocess.check_output(
-                    'echo "%s" | `[ -z "$menu" ] && echo "%s" || echo "$menu"`'
-                    % (items, default_menu),
+                    'echo "%s" | %s' % (items, args.menu),
                     shell=True).decode('utf-8')
         except subprocess.CalledProcessError:
             selection = ''
