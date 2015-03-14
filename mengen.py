@@ -19,6 +19,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('infile')
     parser.add_argument('-m', '--menu', default='dmenu -i -l 20')
+    parser.add_argument('-i', '--idxopt', default='-si')
     parser.add_argument('start', nargs='?', default='main')
     parser.add_argument('arg', nargs='*', default=[])
     args = parser.parse_args()
@@ -53,9 +54,14 @@ if __name__ == '__main__':
                     for line in gen_items.split('\n'):
                         item_dict[line + '\n'] = item
         items = items.replace('"', '\\"').strip()
+        menu = args.menu
+        if 'idx' in menudata:
+            idx = int(subprocess.check_output(
+                    '%s echo $((%s))' % (env, menudata['idx']), shell=True))
+            menu += ' %s %i' % (args.idxopt, idx)
         try:
             selection = subprocess.check_output(
-                    'echo "%s" | %s' % (items, args.menu),
+                    'echo "%s" | %s' % (items, menu),
                     shell=True).decode('utf-8')
         except subprocess.CalledProcessError:
             selection = ''
