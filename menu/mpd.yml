@@ -54,8 +54,9 @@ artist:
     - txt: Play all
       cmd: >
           mpc -q clear;
-          mpc -f '%date%\t%track%\t%title%\t%file%' find artist "$name" |
-          sort -t$'\t' -k1,1 -k2,2g | cut -f4 | mpc add && mpc play
+          mpc -f '%date%\t%disc%\t%track%\t%title%\t%file%'
+          find artist "$name" | sort -t$'\t' -k1,1 -k2,2g -k3,3g | cut -f5 |
+          mpc add && mpc play
   gen: >
     mpc -f '%date%\t%album%' find artist "$name" | sort -u -t$'\t' -k1,1 -k2,2
   cmd: >
@@ -65,8 +66,10 @@ album:
   items:
     - txt: Play all
       cmd: mpc -q clear; mpc find album "$name" | mpc add && mpc play
-  gen: mpc -f '%track%\t%title%' find album "$name" | sort -t$'\t' -k1,1g -k2,2
+  gen: >
+    mpc -f '%disc%\t%track%\t%title%' find album "$name" |
+    sort -t$'\t' -k1,1g -k2,2g -k3,3 | cut -f2,3
   cmd: >
     [ -z "$item" ] && $men browse ||
-    mpc find album "$name" track "`echo "$item" |
-    cut -f1`" title "`echo "$item" | cut -f2`" | mpc add && mpc play
+    mpc -q clear && mpc find album "$name" track "`echo "$item" | cut -f1`"
+    title "`echo "$item" | cut -f2`" | mpc add && mpc play
