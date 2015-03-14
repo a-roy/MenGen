@@ -9,13 +9,11 @@ def evaluate(env, item):
     if 'cmd' in item:
         subprocess.call(env + item['cmd'], shell=True)
     if 'men' in item:
-        print(item['men'])
         men_args = [subprocess.check_output(
             '%s echo %s' % (env, a), shell=True).decode('utf-8').strip('\n')
             for a in shlex.split(item['men'])]
         args.start = men_args[0]
         args.arg = men_args[1:]
-        print(men_args)
 
 if __name__ == '__main__':
     parser = ArgumentParser()
