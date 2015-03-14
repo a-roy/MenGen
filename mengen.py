@@ -24,10 +24,13 @@ if __name__ == '__main__':
         for x in range(n):
             env += '%s="%s";' % (menudata['args'][x], args.arg[x])
     items = ''
+    item_dict = {}
     if 'items' in menudata:
         for item in menudata['items']:
             items += subprocess.check_output(
                     'echo %s' % item['txt'], shell=True).decode('utf-8')
+            item_dict[subprocess.check_output('echo %s' % item['txt'],
+                shell=True).decode('utf-8')] = item['cmd']
     if 'gen' in menudata:
         gen = menudata['gen']
         items += subprocess.check_output(
@@ -42,13 +45,7 @@ if __name__ == '__main__':
         selection = ''
 
     env += 'item="%s";' % selection.strip()
-    if 'items' in menudata:
-        item_dict = { subprocess.check_output(
-                    'echo %s' % item['txt'], shell=True).decode('utf-8') :
-                    item['cmd'] for item in menudata['items'] }
-        if selection in item_dict:
+    if 'items' in menudata and selection in item_dict:
             subprocess.call(env + item_dict[selection], shell=True)
-        elif 'cmd' in menudata:
-            subprocess.call(env + menudata['cmd'], shell=True)
     elif 'cmd' in menudata:
         subprocess.call(env + menudata['cmd'], shell=True)
