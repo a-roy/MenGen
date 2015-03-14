@@ -43,7 +43,8 @@ if __name__ == '__main__':
             for item in menudata['items']:
                 if 'txt' in item:
                     key = subprocess.check_output(
-                            'echo %s' % item['txt'], shell=True).decode('utf-8')
+                            '%s echo %s' % (env, item['txt']),
+                            shell=True).decode('utf-8')
                     items += key
                     item_dict[key] = item
                 elif 'gen' in item:
