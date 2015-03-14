@@ -70,6 +70,12 @@ artist:
         mpc -f '%date%\t%album%' find artist "$name" |
         sort -u -t$'\t' -k1,1 -k2,2
       men: album "`echo \"$item\" | cut -f2`"
+    - gen: >
+        mpc -f '%date%\t%album%\t%disc%\t%track%\t%title%\t'
+        find artist "$name" | sort -t$'\t' -k1,1 -k2,2 -k3,3g -k4,4g | cut -f2,5
+      cmd: >
+        mpc -q clear; mpc find artist "$name" album "`echo "$item" | cut -f1`"
+        title "`echo "$item" | cut -f2`" | mpc add && mpc play
   men: browse
 album:
   args: [ name ]
