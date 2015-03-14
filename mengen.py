@@ -2,9 +2,22 @@
 
 from argparse import ArgumentParser
 import subprocess
+import shlex
 import yaml
 
 default_menu = 'dmenu -i -l 20'
+
+def evaluate(env, item):
+    if 'cmd' in item:
+        subprocess.call(env + item['cmd'], shell=True)
+    if 'men' in item:
+        print(item['men'])
+        men_args = [subprocess.check_output(
+            '%s echo %s' % (env, a), shell=True).decode('utf-8').strip('\n')
+            for a in shlex.split(item['men'])]
+        args.start = men_args[0]
+        args.arg = men_args[1:]
+        print(men_args)
 
 if __name__ == '__main__':
     parser = ArgumentParser()
@@ -16,36 +29,43 @@ if __name__ == '__main__':
     f = open(args.infile)
     data = yaml.load(f)
     f.close()
-    menudata = data[args.start]
 
-    env = 'men="python3 %s %s";' % (__file__, args.infile)
-    if 'args' in menudata:
-        n = min(len(menudata['args']), len(args.arg))
-        for x in range(n):
-            env += '%s="%s";' % (menudata['args'][x], args.arg[x])
-    items = ''
-    item_dict = {}
-    if 'items' in menudata:
-        for item in menudata['items']:
-            key = subprocess.check_output(
-                    'echo %s' % item['txt'], shell=True).decode('utf-8')
-            items += key
-            item_dict[key] = item['cmd']
-    if 'gen' in menudata:
-        gen = menudata['gen']
-        items += subprocess.check_output(
-                '%s echo "`%s`"' % (env, gen), shell=True).decode('utf-8')
-    items = items.replace('"', '\\"').strip()
-    try:
-        selection = subprocess.check_output(
-                'echo "%s" | `[ -z "$menu" ] && echo "%s" || echo "$menu"`'
-                % (items, default_menu),
-                shell=True).decode('utf-8')
-    except subprocess.CalledProcessError:
-        selection = ''
+    while args.start:
+        menudata = data[args.start]
+        args.start = None
 
-    env += 'item="%s";' % selection.strip()
-    if 'items' in menudata and selection in item_dict:
-            subprocess.call(env + item_dict[selection], shell=True)
-    elif 'cmd' in menudata:
-        subprocess.call(env + menudata['cmd'], shell=True)
+        env = ''
+        if 'args' in menudata:
+            n = min(len(menudata['args']), len(args.arg))
+            for x in range(n):
+                env += '%s="%s";' % (menudata['args'][x], args.arg[x])
+        items = ''
+        item_dict = {}
+        if 'items' in menudata:
+            for item in menudata['items']:
+                if 'txt' in item:
+                    key = subprocess.check_output(
+                            'echo %s' % item['txt'], shell=True).decode('utf-8')
+                    items += key
+                    item_dict[key] = item
+                elif 'gen' in item:
+                    gen_items = subprocess.check_output(
+                            '%s echo "`%s`"' % (env, item['gen']),
+                            shell=True).decode('utf-8')
+                    items += gen_items
+                    for line in gen_items.split('\n'):
+                        item_dict[line + '\n'] = item
+        items = items.replace('"', '\\"').strip()
+        try:
+            selection = subprocess.check_output(
+                    'echo "%s" | `[ -z "$menu" ] && echo "%s" || echo "$menu"`'
+                    % (items, default_menu),
+                    shell=True).decode('utf-8')
+        except subprocess.CalledProcessError:
+            selection = ''
+
+        env += 'item="%s";' % selection.strip()
+        if selection in item_dict:
+            evaluate(env, item_dict[selection])
+        else:
+            evaluate(env, menudata)
