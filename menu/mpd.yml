@@ -16,33 +16,33 @@ browse:
 current:
   items:
     - gen: mpc -f '%position%\t[[%artist% - %title%]|%file%]' playlist
-      cmd: mpc play "`echo "$item" | cut -f1`"
-  idx: "`mpc -f '%position%' current` - 1"
+      cmd: mpc play "$(echo "$item" | cut -f1)"
+  idx: $(($(mpc -f '%position%' current) - 1))
   men: main
 options:
   args: [ idx ]
   items:
     - txt: >
-        1$'\t'Repeat$'\t'`mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 3`
+        1$'\t'Repeat$'\t'$(mpc status | grep volume | tr -s ' ' |
+        cut -d ' ' -f 3)
       cmd: mpc repeat
       men: options 0
     - txt: >
-        2$'\t'Random$'\t'`mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 5`
+        2$'\t'Random$'\t'$(mpc status | grep volume | tr -s ' ' |
+        cut -d ' ' -f 5)
       cmd: mpc random
       men: options 1
     - txt: >
-        3$'\t'Single$'\t'`mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 7`
+        3$'\t'Single$'\t'$(mpc status | grep volume | tr -s ' ' |
+        cut -d ' ' -f 7)
       cmd: mpc single
       men: options 2
     - txt: >
-        4$'\t'Consume$'\t'`mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 9`
+        4$'\t'Consume$'\t'$(mpc status | grep volume | tr -s ' ' |
+        cut -d ' ' -f 9)
       cmd: mpc consume
       men: options 3
-  idx: "`[ -z $idx ] && echo 0 || echo $idx`"
+  idx: $([ -z $idx ] && echo 0 || echo $idx)
   men: main
 playback:
   args: [ idx ]
@@ -60,7 +60,7 @@ playback:
       cmd: mpc stop
     - txt: 5$'\t'Clear playlist
       cmd: mpc clear
-  idx: "`[ -z $idx ] && echo 0 || echo $idx`"
+  idx: $([ -z $idx ] && echo 0 || echo $idx)
   men: main
 artist:
   args: [ name ]
@@ -74,13 +74,13 @@ artist:
     - gen: >
         mpc -f '%date%\t%album%' find artist "$name" |
         sort -u -t$'\t' -k1,1 -k2,2
-      men: album "`echo \"$item\" | cut -f2`"
+      men: album "$(echo \"$item\" | cut -f2)"
     - gen: >
         mpc -f '%date%\t%album%\t%disc%\t%track%\t%title%\t'
         find artist "$name" | sort -t$'\t' -k1,1 -k2,2 -k3,3g -k4,4g | cut -f2,5
       cmd: >
-        mpc -q clear; mpc find artist "$name" album "`echo "$item" | cut -f1`"
-        title "`echo "$item" | cut -f2`" | mpc add && mpc play
+        mpc -q clear; mpc find artist "$name" album "$(echo "$item" | cut -f1)"
+        title "$(echo "$item" | cut -f2)" | mpc add && mpc play
   men: browse
 album:
   args: [ name ]
@@ -91,6 +91,6 @@ album:
         mpc -f '%disc%\t%track%\t%title%' find album "$name" |
         sort -t$'\t' -k1,1g -k2,2g -k3,3 | cut -f2,3
       cmd: >
-        mpc -q clear; mpc find album "$name" track "`echo "$item" | cut -f1`"
-        title "`echo "$item" | cut -f2`" | mpc add && mpc play
+        mpc -q clear; mpc find album "$name" track "$(echo "$item" | cut -f1)"
+        title "$(echo "$item" | cut -f2)" | mpc add && mpc play
   men: browse

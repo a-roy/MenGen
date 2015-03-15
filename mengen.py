@@ -49,7 +49,7 @@ if __name__ == '__main__':
                     item_dict[key] = item
                 elif 'gen' in item:
                     gen_items = subprocess.check_output(
-                            '%s echo "`%s`"' % (env, item['gen']),
+                            '%s echo "$(%s)"' % (env, item['gen']),
                             shell=True).decode('utf-8')
                     items += gen_items
                     for line in gen_items.split('\n'):
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         menu = args.menu
         if 'idx' in menudata:
             idx = int(subprocess.check_output(
-                    '%s echo $((%s))' % (env, menudata['idx']), shell=True))
+                    '%s echo %s' % (env, menudata['idx']), shell=True))
             menu += ' %s %i' % (args.idxopt, idx)
         try:
             selection = subprocess.check_output(
