@@ -37,6 +37,9 @@ if __name__ == '__main__':
             n = min(len(menudata['args']), len(args.arg))
             for x in range(n):
                 env += '%s="%s";' % (menudata['args'][x], args.arg[x])
+        if 'env' in menudata:
+            for line in menudata['env']:
+                env += '%s;' % line
         items = ''
         item_dict = {}
         if 'items' in menudata:

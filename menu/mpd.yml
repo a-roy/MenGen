@@ -21,25 +21,18 @@ current:
   men: main
 options:
   args: [ idx ]
+  env: [ mps=$(mpc status | grep volume | tr -s ' ') ]
   items:
-    - txt: >
-        1$'\t'Repeat$'\t'$(mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 3)
+    - txt: 1$'\t'Repeat$'\t'$(echo "$mps" | cut -d ' ' -f 3)
       cmd: mpc repeat
       men: options 0
-    - txt: >
-        2$'\t'Random$'\t'$(mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 5)
+    - txt: 2$'\t'Random$'\t'$(echo "$mps" | cut -d ' ' -f 5)
       cmd: mpc random
       men: options 1
-    - txt: >
-        3$'\t'Single$'\t'$(mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 7)
+    - txt: 3$'\t'Single$'\t'$(echo "$mps" | cut -d ' ' -f 7)
       cmd: mpc single
       men: options 2
-    - txt: >
-        4$'\t'Consume$'\t'$(mpc status | grep volume | tr -s ' ' |
-        cut -d ' ' -f 9)
+    - txt: 4$'\t'Consume$'\t'$(echo "$mps" | cut -d ' ' -f 9)
       cmd: mpc consume
       men: options 3
   idx: $([ -z $idx ] && echo 0 || echo $idx)
