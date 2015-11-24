@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+import os.path
 import subprocess
 import shlex
 import yaml
@@ -24,7 +25,10 @@ if __name__ == '__main__':
     parser.add_argument('arg', nargs='*', default=[])
     args = parser.parse_args()
 
-    f = open(args.infile)
+    try:
+        f = open(args.infile)
+    except FileNotFoundError:
+        f = open(os.path.expanduser('~/menu/%s.yml' % args.infile))
     data = yaml.load(f)
     f.close()
 
