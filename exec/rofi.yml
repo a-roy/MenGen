@@ -1,0 +1,7 @@
+exec: rofi -dmenu -i
+options:
+  prompt: -p
+  mesg: -mesg
+  idx: -selected-row
+  active: -a
+  urgent: -u

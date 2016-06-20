@@ -19,11 +19,24 @@ def evaluate(env, item):
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('infile')
-    parser.add_argument('-m', '--menu', default='dmenu -i -l 20')
-    parser.add_argument('-i', '--idxopt', default='-si')
+    parser.add_argument('-m', '--menu')
     parser.add_argument('start', nargs='?', default='main')
     parser.add_argument('arg', nargs='*', default=[])
     args = parser.parse_args()
+
+    try:
+        try:
+            e = open(os.path.expanduser(args.menu))
+        except FileNotFoundError:
+            e = open(os.path.expanduser('~/menu/exec/%s.yml' % args.menu))
+        rules = yaml.load(e)
+        e.close()
+    except:
+        rules = yaml.load("""
+        exec: dmenu -i -l 20
+        options:
+          idx: -si
+        """)
 
     try:
         f = open(args.infile)
@@ -62,11 +75,14 @@ if __name__ == '__main__':
                     for line in gen_items.split('\n'):
                         item_dict[line + '\n'] = item
         items = items.replace('"', '\\"').strip('\n')
-        menu = args.menu
-        if 'idx' in menudata:
-            idx = int(subprocess.check_output(
-                    '%s echo %s' % (env, menudata['idx']), shell=True))
-            menu += ' %s %i' % (args.idxopt, idx)
+        menu = rules['exec']
+        if 'options' in rules:
+            for name in rules['options']:
+                flag = rules['options'][name]
+                if name in menudata:
+                    val = subprocess.check_output(
+                            '%s echo %s' % (env, menudata[name]), shell=True)
+                    menu += ' %s %s' % (flag, val.decode().strip('\n'))
         try:
             selection = subprocess.check_output(
                     'echo "%s" | %s' % (items, menu),
