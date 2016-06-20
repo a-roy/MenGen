@@ -1,4 +1,7 @@
 main:
+  prompt: MPD
+  mesg: >
+    \"\<span color=\'#0C73C2\'\>Currently Playing: $(mpc current)\</span\>\"
   items:
     - txt: 1$'\t'Browse Library
       men: browse
@@ -9,17 +12,20 @@ main:
     - txt: 4$'\t'Playback
       men: playback
 browse:
+  prompt: Browse Artists
   items:
     - gen: mpc -f '[%albumartist%|%artist%]' search title '' | sort -u
       men: artist "$item"
   men: main
 current:
+  prompt: \"Current Playlist\"
   items:
-    - gen: mpc -f '%position%\t[[%artist% - %title%]|%file%]' playlist
+    - gen: mpc -f '%position%\t[[%artist%& - %title%]|%file%]' playlist
       cmd: mpc play "$(echo "$item" | cut -f1)"
   idx: $(($(mpc -f '%position%' current) - 1))
   men: main
 options:
+  prompt: Options
   args: [ idx ]
   env: [ mps=$(mpc status | grep volume | tr -s ' ') ]
   items:
@@ -38,6 +44,7 @@ options:
   idx: $([ -z $idx ] && echo 0 || echo $idx)
   men: main
 playback:
+  prompt: Playback
   args: [ idx ]
   items:
     - txt: 1$'\t'Toggle playback
@@ -56,32 +63,42 @@ playback:
   idx: $([ -z $idx ] && echo 0 || echo $idx)
   men: main
 artist:
+  prompt: \"$name\"
   args: [ name ]
   items:
     - txt: Play all
       cmd: >
           mpc -q clear;
+          echo "$(
           mpc -f '%date%\t%disc%\t%track%\t%title%\t%file%'
-          find artist "$name" | sort -t$'\t' -k1,1 -k2,2g -k3,3g | cut -f5 |
+          find albumartist "$name";
+          mpc -f '%date%\t%disc%\t%track%\t%title%\t%file%'
+          find artist "$name"
+          )" | sort -u -t$'\t' -k1,1 -k2,2g -k3,3g | cut -f5 |
           mpc add && mpc play
     - gen: >
-        mpc -f '%date%\t%album%' find artist "$name" |
-        sort -u -t$'\t' -k1,1 -k2,2
+        mpc -f '[[%date%&\t%album%]|\t%album%]' find artist "$name" |
+        sort -u -t$'\t' -k1,1 -k2,2 | sed '/^$/d'
       men: album "$(echo \"$item\" | cut -f2)"
     - gen: >
-        mpc -f '%date%\t%album%\t%disc%\t%track%\t%title%\t'
-        find artist "$name" | sort -t$'\t' -k1,1 -k2,2 -k3,3g -k4,4g | cut -f2,5
+        echo "$(
+        mpc -f '%date%\t%album%\t%disc%\t%track%\t[%title%|%file%]'
+        find albumartist "$name";
+        mpc -f '%date%\t%album%\t%disc%\t%track%\t[%title%|%file%]'
+        find artist "$name"
+        )" | sort -u -t$'\t' -k1,1 -k2,2 -k3,3g -k4,4g | cut -f2,5
       cmd: >
         mpc -q clear; mpc find artist "$name" album "$(echo "$item" | cut -f1)"
         title "$(echo "$item" | cut -f2)" | mpc add && mpc play
   men: browse
 album:
+  prompt: MPD
   args: [ name ]
   items:
     - txt: Play all
       cmd: mpc -q clear; mpc find album "$name" | mpc add && mpc play
     - gen: >
-        mpc -f '%disc%\t%track%\t%title%' find album "$name" |
+        mpc -f '%disc%\t%track%\t[%title%|%file%]' find album "$name" |
         sort -t$'\t' -k1,1g -k2,2g -k3,3 | cut -f2,3
       cmd: >
         mpc -q clear; mpc find album "$name" track "$(echo "$item" | cut -f1)"
